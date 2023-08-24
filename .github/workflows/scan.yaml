@@ -1,0 +1,24 @@
+name: Run SCA scan on the source code and DAST on the web application
+on: push
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    name: Run SCA scan to check for code vulnerabilities
+    steps:
+      - uses: actions/checkout@master
+      - name: RunSnyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Run DAST scan on the web application
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.6.1
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          target: 'http://54.162.143.127:8000/'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
